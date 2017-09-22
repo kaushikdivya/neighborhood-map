@@ -13,7 +13,7 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-            position: absolute; 
+            position: absolute;
             margin: 0;
             }
         p {
@@ -40,7 +40,7 @@
             text-decoration: none;
             color: #7D7D7D;
             }
-        hr { 
+        hr {
             margin: 10px 0 0 0;
             color: gray;
             border-color: gray;
@@ -48,7 +48,7 @@
 
       .container {
         position: absolute;
-        z-index: 3; 
+        z-index: 3;
       }
 
       #input {
@@ -126,4 +126,34 @@
     font-size: 14px;
     color: white;
     outline: none;
+}
+
+#left-nav {
+    height: 50px;
+    width: 50px;
+}
+
+.hamburger-container {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.bar1, .bar2, .bar3 {
+    width: 35px;
+    height: 5px;
+    background-color: grey;
+    margin: 6px 0;
+    transition: 0.4s;
+}
+
+.change .bar1 {
+    -webkit-transform: rotate(-45deg) translate(-9px, 6px) ;
+    transform: rotate(-45deg) translate(-9px, 6px) ;
+}
+
+.change .bar2 {opacity: 0;}
+
+.change .bar3 {
+    -webkit-transform: rotate(45deg) translate(-8px, -8px) ;
+    transform: rotate(45deg) translate(-8px, -8px) ;
 }

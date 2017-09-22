@@ -1,49 +1,62 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Store Map</title>
-    <link rel="stylesheet" href="static/style.css">
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
-</head>
-<body>
-    <div id="map"></div> 
-    <div class="container">
-        <div class="options-box">
-    
-        
-          <span class="text">Search for nearby places</span>
-          <input id="filter-box" placeholder="Filter" id="input" type="input" data-bind="textInput: query, valueUpdate: 'keydown'" autocomplete="off"></input>
-        
-            <div id="place-list">
-                <ul data-bind="template: {name: 'marker', foreach:locations}">
-                </ul>
-                <script type="text/html" id="marker">
-                    <div data-bind="visible: visible">
-                        <a href="#" data-bind="attr: {id: id}">
-                            <li>
-                                <strong data-bind="text: title"></strong>
-                                <p data-bind="text: streetAddress"></p>
-                                <p data-bind="text: cityStateZipCode"></p>
-                            </li>
-                        </a>
-                    </div>
-                </script>
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Store Map</title>
+        <link rel="stylesheet" href="static/style.css">
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    </head>
+
+    <body>
+
+        <div id="map"></div>
+
+        <div class="container">
+
+            <div class="options-box">
+
+                <span class="text">Search for nearby places</span>
+                <input placeholder="Filter" id="input" type="search" data-bind="textInput: query, valueUpdate: 'keydown'" autocomplete="off">
+
+                <div id="place-list">
+                    <ul data-bind="template: {name: 'marker', foreach: locations}"></ul>
+                    <script type="text/html" id="marker">
+                        <div data-bind="visible: visible">
+                            <a href="#" data-bind="attr: {id: id}">
+                                <li>
+                                    <p data-bind="text: title"></p>
+                                    <p data-bind="text: streetAddress"></p>
+                                    <p data-bind="text: cityStateZipCode"></p>
+                                </li>
+                            </a>
+                        </div>
+                    </script>
+                                    
+                </div> <!-- places-list-->
+
+            </div> <!-- options-box-->
+            <div class="hamburger-container">
+                <div class="bar1"></div>
+                <div class="bar2"></div>
+                <div class="bar3"></div>
             </div>
+
+
+        </div> <!-- container-->
+
+        <div class="reset-container">
+            <button id="reset">Reset Map Zoom</button>
         </div>
-         
-    </div>
-    <div class="reset-container">
-        <button id="reset">Reset Map Zoom</button>
-    </div>
-    
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA3u30R7S9v8hz0jTiVk09CwuFGu7Qb4kw&libraries=places,geometry,drawing&callback=initMap">
-    </script>
-    
-    <script src="js/lib/knockout-3.2.0.js"></script>
-    <script src="js/app.js"></script>
-    
-    
-</body>
+
+        <script src="js/lib/knockout-3.2.0.js"></script>
+
+        <script src="js/app.js"></script>
+
+        <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA3u30R7S9v8hz0jTiVk09CwuFGu7Qb4kw&libraries=places,geometry,drawing&callback=initMap">
+        </script>
+
+    </body>
 </html>
