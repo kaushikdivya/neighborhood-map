@@ -154,17 +154,26 @@ function initMap() {
     var uluru = {lat: 37.5483, lng: -121.9886};
 
     var mapOptions = {
-       center: uluru,
-       zoom: 10,
-       mapTypeControl: false,
+      center: uluru,
+      zoom: 10,
+      mapTypeControl: true,
+      mapTypeControlOptions: {
+        style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+        position: google.maps.ControlPosition.TOP_CENTER
+        },
+      zoomControl: true,
+      zoomControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_CENTER
+      },
        disableDefaultUI: true
     };
 
     if ($(window).width() <= 1080) {
-      mapOptions.zoom = 13;
+      mapOptions.zoom = 10;
     }
 
-    if ($(window).width() < 850 || $(window).height() < 595) {
+    if ($(window).width() < 850) {
+        mapOptions.zoom = 10;
         hideNav();
     }
 
@@ -177,18 +186,26 @@ function initMap() {
     //Reset map on click handler and
     //when window resize conditionals are met
     function resetMap() {
+      console.log("In resetMap function")
         var windowWidth = $(window).width();
-        infowindow.close();
-        if(windowWidth <= 1080) {
-            map.setZoom(13);
+        if (infowindow) {
+              console.log(infowindow)
+              infowindow.close();
+            }
+        if (windowWidth > 1080) {
+            map.setZoom(10);
             map.setCenter(mapOptions.center);
-        } else if(windowWidth > 1080) {
+        } else if(windowWidth <= 1080) {
+            map.setZoom(10);
+            map.setCenter(mapOptions.center);
+        } else if(windowWidth < 850) {
             map.setZoom(10);
             map.setCenter(mapOptions.center);
         }
     }
 
     $("#reset").click(function() {
+        console.log("In resetMap function call")
         resetMap();
     });
 
@@ -202,6 +219,7 @@ function initMap() {
 
     function setUpMap() {
       for (var i = 0; i < locations.length; i++) {
+        console.log("inside setup map")
         if(locations[i].showMarker === true) {
           locations[i].positionMarker.setMap(map);
         } else {
@@ -246,7 +264,6 @@ function initMap() {
           //Click marker to view infoWindow
           //zoom in and center location on click
 
-
           new google.maps.event.addListener(locations[i].positionMarker, 'click', (function(marker) {
             return function() {
               populateInfoWindow(marker, infowindow);
@@ -261,80 +278,87 @@ function initMap() {
               } else if(windowWidth > 1080) {
                   map.setZoom(13);
               }
-              console.log(marker);
               map.setCenter(marker.getPosition());
               marker.picshowMarker = true;
               google.maps.event.addListener(infowindow,'closeclick',function(){
                 console.log("In infowindow close event");
+                marker.setAnimation(google.maps.Animation.drop);
                 resetMap();
-                marker.setAnimation(null);
               });
             };
           })(locations[i].positionMarker));
-
-
-
           //Click nav element to view infoWindow
           //zoom in and center location on click
         } // end of for
 
     } // end of createMarkers
 
-
     //Get Google Street View Image for each inidividual marker
     //Passed lat and lng to get each image location
-    //Had to pass title for whitehouse & different lat and lng to get images
-    //for White House and Capitol
 
     function populateInfoWindow(marker, infowindow) {
 
-        if (infowindow.marker != marker) {
+      if (infowindow.marker != marker) {
+        infowindow.setContent('');
+        infowindow.marker = marker;
+        infowindow.addListener('closeclick', function() {
+          infowindow.marker = null;
+        });
 
-            infowindow.setContent('');
-            infowindow.marker = marker;
-            infowindow.addListener('closeclick', function() {
-                infowindow.marker = null;
-            });
+        var streetViewService = new google.maps.StreetViewService();
+        var radius = 50;
+        var temp_f;
+        var icon_url;
+        var icon;
+        var url = "http://api.wunderground.com/api/4609de5ed8f9692d/geolookup/conditions/q/" + marker.position.lat() + "," + marker.position.lng() + ".json";
+        function getStreetView(data, status) {
+          if (status == google.maps.StreetViewStatus.OK) {
+            contentString = '<div id="pano"></div><br><hr style="margin-bottom: 5px"><strong>' +
+                            marker.title + '</strong><br><p>' +
+                            marker.streetAddress + '<br>' +
+                            marker.cityStateZipCode + '<br></p>' +
+                            '<ul style="padding: 0; margin: 0"><li style="padding: 0">' +
+                            'Temp: ' + temp_f + '° F <img style="width: 25px" src='
+                            + icon_url + '>' + icon + '<img style="" src=image/wundergroundLogo_4c.jpg>' +
+                            '</li></ul>';
+            var nearStreetViewLocation = data.location.latLng;
+            var heading = google.maps.geometry.spherical.computeHeading(
+                nearStreetViewLocation, marker.position
+            );
+            infowindow.setContent(contentString);
 
-            var streetViewService = new google.maps.StreetViewService();
-            var radius = 50;
+            var panoramaOptions = {
+                position: nearStreetViewLocation,
+                pov: {
+                    heading: 20,
+                    pitch: 20
+                }
+            };
 
-            function getStreetView(data, status) {
-                if (status == google.maps.StreetViewStatus.OK) {
-                    contentString = '<div id="pano"></div><br><hr style="margin-bottom: 5px"><strong>' +
-                                marker.title + '</strong><br><p>' +
-                                marker.streetAddress + '<br>' +
-                                marker.cityStateZipCode + '<br></p>';
-                    var nearStreetViewLocation = data.location.latLng;
-                    //var heading = data.links['0'].heading;
-                    var heading = google.maps.geometry.spherical.computeHeading(
-                        nearStreetViewLocation, marker.position
-                    );
-                    infowindow.setContent(contentString);
+            new google.maps.StreetViewPanorama(
+                document.getElementById('pano'), panoramaOptions
+            );
 
-                    var panoramaOptions = {
-                        position: nearStreetViewLocation,
-                        pov: {
-                            heading: 20,
-                            pitch: 20
-                        }
-                    };
-
-                    var panorama = new google.maps.StreetViewPanorama(
-                        document.getElementById('pano'), panoramaOptions
-                    );
-
-                  } else {
-                    infowindow.setContent('<div>' + marker.title + '</div>' +
-                      '<div>No Street View Found</div>');
-                  }
-            }
-
-            //function to place google street view images within info windows
-            streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
+          } else {
+            infowindow.setContent('<div>' + marker.title + '</div>' +
+              '<div>No Street View Found</div>');
+          }
         }
-    }
 
+        $.getJSON(url, function(data) {
+          temp_f = data['current_observation']['temp_f'];
+          icon_url = data['current_observation']['icon_url'];
+          icon = data['current_observation']['icon'];
+          console.log("Getting weather from API", {
+            temp: temp_f,
+            icon_url: icon_url,
+            icon: icon
+          });
+          //function to place google street view images within info windows
+          streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
+        });   
+      }
+    }
 
     var viewModel = {
         query: ko.observable('')
@@ -343,7 +367,6 @@ function initMap() {
     viewModel.locations = ko.dependentObservable(function() {
         var self = this;
         var search = self.query().toLowerCase();
-
         return ko.utils.arrayFilter(locations, function(location) {
             if (location.title.toLowerCase().indexOf(search) >= 0) {
                 location.showMarker = true;
@@ -358,70 +381,72 @@ function initMap() {
 
     ko.applyBindings(viewModel);
 
-    //show $ hide markers in sync with nav
+    
     $("#input").keyup(function() {
-        console.log("inside input keyup function");
         setUpMap();
     });
 
+//show and hide markers in sync with nav
     var isNavVisible = true;
     function hideNav() {
-        $(".options-box").animate({
-            height: 0
-        }, 500);
-        setTimeout(function() {
-            $(".options-box").hide();
-        }, 500);
-        isNavVisible = false;
+      $(".options-box").animate({
+          height: 0
+      }, 500);
+      setTimeout(function() {
+          $(".options-box").hide();
+      }, 500);
+      isNavVisible = false;
     }
 
     function showNav() {
-        $(".options-box").show();
-        var scrollerHeight = $("#place-list").height() + 55;
-        if($(window).height() < 600) {
-            $(".options-box").animate({
-                height: scrollerHeight - 100,
-            }, 500, function() {
-            $(this).css('height','auto').css("max-height", 439);
-            });
-        } else {
-            $(".options-box").animate({
-                height: scrollerHeight,
-            }, 500, function() {
-                $(this).css('height','auto').css("max-height", 549);
-            });
-        }
-        isNavVisible = true;
+      $(".options-box").show();
+      var scrollerHeight = $("#place-list").height() + 55;
+      if($(window).height() < 600) {
+        $(".options-box").animate({
+          height: scrollerHeight - 100,
+        }, 500, function() {
+        $(this).css('height','auto').css("max-height", 439);
+        });
+      } else {
+        $(".options-box").animate({
+          height: scrollerHeight,
+        }, 500, function() {
+          $(this).css('height','auto').css("max-height", 549);
+        });
+      }
+      isNavVisible = true;
     }
 
     function navState() {
-        if(isNavVisible === true) {
-            hideNav();
-        } else {
-            showNav();
-        }
+      if(isNavVisible === true) {
+        hideNav();
+      } else {
+        showNav();
+      }
     }
 
     $(".hamburger-container").click(navState);
 
     var infowindow = new google.maps.InfoWindow();
     for (var i = 0; i < locations.length; i++) {
-        var searchNav = $('#store' + i);
-        searchNav.click(
-            (function(marker) {
-                return function() {
-                    populateInfoWindow(marker, infowindow);
-                    infowindow.open(map,marker);
-                    map.setZoom(16);
-                    map.setCenter(marker.getPosition());
-                    marker.picshowMarker = true;
-                };
-            })(locations[i].positionMarker)
-        );
-    }
-
-
-
-
+      var searchNav = $('#store' + i);
+      searchNav.click(
+      (function(marker) {
+        return function() {
+          populateInfoWindow(marker, infowindow);
+          infowindow.open(map,marker);
+          map.setZoom(16);
+          map.setCenter(marker.getPosition());
+          marker.picshowMarker = true;
+          google.maps.event.addListener(
+          infowindow,
+          'closeclick',
+          function(){
+            resetMap();
+          });
+        };
+      })(locations[i].positionMarker)
+    );
+  }
 }
 
