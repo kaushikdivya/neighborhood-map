@@ -212,9 +212,9 @@ function initMap() {
         resetMap();
     });
 
-    // This function populates the infowindow when the marker is clicked. We'll only allow
-    // one infowindow which will open at the marker that is clicked, and populate based
-    // on that markers position.
+    // This function populates the infowindow when the marker is clicked.
+    // We'll only allow one infowindow which will open at the marker that
+    // is clicked, and populate based on that markers position.
 
     function setUpMap() {
       for (var i = 0; i < locations.length; i++) {
@@ -231,7 +231,8 @@ function initMap() {
         for(i=0; i<locations.length; i++) {
 
           locations[i].positionMarker = new google.maps.Marker({
-            position: new google.maps.LatLng(locations[i].location.lat, locations[i].location.lng),
+            position: new google.maps.LatLng(locations[i].location.lat,
+              locations[i].location.lng),
             map: map,
             title: locations[i].title,
             streetAddress: locations[i].streetAddress,
@@ -245,40 +246,11 @@ function initMap() {
             }
           });
 
-          locations[i].positionMarker.addListener('click', toggleBounce);
-
-          function toggleBounce() {
-            if (this.getAnimation() !== null) {
-              this.setAnimation(null);
-            } else {
-              this.setAnimation(google.maps.Animation.BOUNCE);
-            }
-          }
-          
           //Click marker to view infoWindow
           //zoom in and center location on click
 
-          new google.maps.event.addListener(locations[i].positionMarker, 'click', (function(marker) {
-            return function() {
-              if (infowindow) {
-                infowindow.close();
-              }
-              populateInfoWindow(marker, infowindow);
-              infowindow.open(map, marker);
-              var windowWidth = $(window).width();
-              if(windowWidth <= 1080) {
-                  map.setZoom(13);
-              } else if(windowWidth > 1080) {
-                  map.setZoom(13);
-              }
-              map.setCenter(marker.getPosition());
-              marker.picshowMarker = true;
-              google.maps.event.addListener(infowindow,'closeclick',function(){
-                marker.setAnimation(google.maps.Animation.drop);
-                resetMap();
-              });
-            };
-          })(locations[i].positionMarker));
+          new google.maps.event.addListener(locations[i].positionMarker,
+                    'click', createInfoWindow(locations[i].positionMarker));
           //Click nav element to view infoWindow
           //zoom in and center location on click
         } // end of for
@@ -287,6 +259,32 @@ function initMap() {
 
     //Get Google Street View Image for each inidividual marker
     //Passed lat and lng to get each image location
+    function createInfoWindow(marker) {
+      return function() {
+        if (infowindow) {
+          infowindow.close();
+        }
+        if (marker.getAnimation() !== null) {
+          marker.setAnimation(null);
+        } else {
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+        }
+        populateInfoWindow(marker, infowindow);
+        infowindow.open(map, marker);
+        var windowWidth = $(window).width();
+        if(windowWidth <= 1080) {
+            map.setZoom(13);
+        } else if(windowWidth > 1080) {
+            map.setZoom(13);
+        }
+        map.setCenter(marker.getPosition());
+        marker.picshowMarker = true;
+        google.maps.event.addListener(infowindow,'closeclick',function(){
+          marker.setAnimation(google.maps.Animation.drop);
+          resetMap();
+        });
+      };
+    }
 
     function populateInfoWindow(marker, infowindow) {
 
@@ -302,16 +300,21 @@ function initMap() {
         var temp_f;
         var icon_url;
         var icon;
-        var url = "http://api.wunderground.com/api/4609de5ed8f9692d/geolookup/conditions/q/" + marker.position.lat() + "," + marker.position.lng() + ".json";
-        function getStreetView(data, status) {
+        var url = "http://api.wunderground.com/api/4609de5ed8f9692d/geolookup/conditions/q/" +
+                  marker.position.lat() + "," + marker.position.lng() + ".json";
+
+        var getStreetView = function (data, status) {
           if (status == google.maps.StreetViewStatus.OK) {
             contentString = '<div id="pano"></div><br><hr style="margin-bottom: 5px"><strong>' +
-                            marker.title + '</strong><br><p>' +
-                            marker.streetAddress + '<br>' +
-                            marker.cityStateZipCode + '<br></p>' +
+                            marker.title +
+                            '</strong><br><p>' +
+                            marker.streetAddress +
+                            '<br>' + marker.cityStateZipCode + '<br></p>' +
                             '<ul style="padding: 0; margin: 0"><li style="padding: 0">' +
-                            'Temp: ' + temp_f + '° F <img style="width: 25px" src=' +
-                            icon_url + '>' + icon + '<img style="" src=image/wundergroundLogo_4c.jpg>' +
+                            'Temp: ' + temp_f +
+                            '° F <img style="width: 25px" src=' +
+                            icon_url + '>' + icon +
+                            '<img style="" src=image/wundergroundLogo_4c.jpg>' +
                             '</li></ul>';
             var nearStreetViewLocation = data.location.latLng;
             var heading = google.maps.geometry.spherical.computeHeading(
@@ -336,20 +339,23 @@ function initMap() {
               '<div>No Street View Found</div>' +
               '<ul style="padding: 0; margin: 0"><li style="padding: 0">' +
               'Temp: ' + temp_f + '° F <img style="width: 25px" src=' +
-              icon_url + '>' + icon + '<img style="" src=image/wundergroundLogo_4c.jpg>' +
+              icon_url + '>' + icon +
+              '<img style="" src=image/wundergroundLogo_4c.jpg>' +
               '</li></ul>');
           }
-        }
+        };
+
         // getting data from weather underground API
         $.getJSON(url, function(data) {
-          temp_f = data['current_observation']['temp_f'];
-          icon_url = data['current_observation']['icon_url'];
-          icon = data['current_observation']['icon'];
+          temp_f = data.current_observation.temp_f;
+          icon_url = data.current_observation.icon_url;
+          icon = data.current_observation.icon;
           //function to place google street view images within info windows
-          streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
+          streetViewService.getPanoramaByLocation(marker.position,
+            radius, getStreetView);
         }).fail(function(e){
-          alert("Data from Weather Undergorund API cannot be load")
-        })  
+          alert("Data from Weather Undergorund API cannot be load");
+        });
       }
     }
 
@@ -374,7 +380,7 @@ function initMap() {
 
     ko.applyBindings(viewModel);
 
-    
+
     $("#input").keyup(function() {
         setUpMap();
     });
@@ -420,30 +426,10 @@ function initMap() {
 
     $(".hamburger-container").click(navState);
 
-    
+
     for (var i = 0; i < locations.length; i++) {
       var searchNav = $('#store' + i);
-      searchNav.click(
-      (function(marker) {
-        return function() {
-          populateInfoWindow(marker, infowindow);
-          if (infowindow) {
-            console.log("!!!!!")
-            infowindow.close();
-          }
-          infowindow.open(map,marker);
-          map.setZoom(16);
-          map.setCenter(marker.getPosition());
-          marker.picshowMarker = true;
-          google.maps.event.addListener(
-          infowindow,
-          'closeclick',
-          function(){
-            resetMap();
-          });
-        };
-      })(locations[i].positionMarker)
-    );
-  }
+      searchNav.click(createInfoWindow(locations[i].positionMarker));
+    }
 }
 
