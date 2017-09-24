@@ -1,11 +1,3 @@
-* {
-    box-sizing:border-box;
-}
-
-*:visited {
-    color: #7D7D7D
-}
-
 body {
     background-color: #CCC;
     color: #7D7D7D;
@@ -92,7 +84,7 @@ hr {
 .options-box {
     width: 280px;
     max-height: 549px;
-    background-color: rgba(256,256,256,.9);
+    background-color: rgba(256,256,254,.9);
     border: solid 2px gray;
     overflow: hidden;
 }
@@ -116,29 +108,6 @@ hr {
     margin: 0 5px;
 }
 
-.reset-container {
-    position: absolute;
-    z-index: 2;
-    width: 100%;
-    bottom: 0;
-    float: middle;
-}
-#reset,
-#reset:focus {
-    float: center;
-    height: 75px;
-    width: 75px;
-    float: right;
-    margin: 0 10px 15px 0;
-    border-radius: 50%;
-    border: solid white 2px;
-    background-color: orange;
-    opacity: 0.9;
-    font-size: 14px;
-    color: white;
-    outline: none;
-}
-
 .hamburger-container {
     display: inline-block;
     cursor: pointer;
@@ -152,17 +121,6 @@ hr {
     transition: 0.4s;
 }
 
-.change .bar1 {
-    -webkit-transform: rotate(-45deg) translate(-9px, 6px) ;
-    transform: rotate(-45deg) translate(-9px, 6px) ;
-}
-
-.change .bar2 {opacity: 0;}
-
-.change .bar3 {
-    -webkit-transform: rotate(45deg) translate(-8px, -8px) ;
-    transform: rotate(45deg) translate(-8px, -8px) ;
-}
 
 
 
