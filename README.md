@@ -10,6 +10,8 @@ This Project is to show 15 Macy's store locations in the SF bay area using Googl
     * Infowindow gets closed everytime another marker is clicked.
     * On closing the infowindow, map zooms out to the original size and location.
     * Locations/markers can be filtered through **search filter box**. Search is based on location title.
+    * Menu hamburger is displays and hides the side bar.
+    * All features are responsive.
     * Another third party API **(Weather Underground)** has been used in the infowindow, which displays the selected location's current weather.
 
 ## Prerequisite:
