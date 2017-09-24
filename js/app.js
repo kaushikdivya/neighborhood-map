@@ -153,6 +153,8 @@ function initMap() {
 
     var uluru = {lat: 37.5483, lng: -121.9886};
 
+    var infowindow = new google.maps.InfoWindow();
+
     var mapOptions = {
       center: uluru,
       zoom: 10,
@@ -186,10 +188,8 @@ function initMap() {
     //Reset map on click handler and
     //when window resize conditionals are met
     function resetMap() {
-      console.log("In resetMap function")
         var windowWidth = $(window).width();
         if (infowindow) {
-              console.log(infowindow)
               infowindow.close();
             }
         if (windowWidth > 1080) {
@@ -205,7 +205,6 @@ function initMap() {
     }
 
     $("#reset").click(function() {
-        console.log("In resetMap function call")
         resetMap();
     });
 
@@ -219,7 +218,6 @@ function initMap() {
 
     function setUpMap() {
       for (var i = 0; i < locations.length; i++) {
-        console.log("inside setup map")
         if(locations[i].showMarker === true) {
           locations[i].positionMarker.setMap(map);
         } else {
@@ -256,21 +254,16 @@ function initMap() {
               this.setAnimation(google.maps.Animation.BOUNCE);
             }
           }
-
-          //Binds infoWindow content to each marker
-
-          var infowindow = new google.maps.InfoWindow();
-
+          
           //Click marker to view infoWindow
           //zoom in and center location on click
 
           new google.maps.event.addListener(locations[i].positionMarker, 'click', (function(marker) {
             return function() {
-              populateInfoWindow(marker, infowindow);
               if (infowindow) {
                 infowindow.close();
-            }
-
+              }
+              populateInfoWindow(marker, infowindow);
               infowindow.open(map, marker);
               var windowWidth = $(window).width();
               if(windowWidth <= 1080) {
@@ -281,7 +274,6 @@ function initMap() {
               map.setCenter(marker.getPosition());
               marker.picshowMarker = true;
               google.maps.event.addListener(infowindow,'closeclick',function(){
-                console.log("In infowindow close event");
                 marker.setAnimation(google.maps.Animation.drop);
                 resetMap();
               });
@@ -318,8 +310,8 @@ function initMap() {
                             marker.streetAddress + '<br>' +
                             marker.cityStateZipCode + '<br></p>' +
                             '<ul style="padding: 0; margin: 0"><li style="padding: 0">' +
-                            'Temp: ' + temp_f + '° F <img style="width: 25px" src='
-                            + icon_url + '>' + icon + '<img style="" src=image/wundergroundLogo_4c.jpg>' +
+                            'Temp: ' + temp_f + '° F <img style="width: 25px" src=' +
+                            icon_url + '>' + icon + '<img style="" src=image/wundergroundLogo_4c.jpg>' +
                             '</li></ul>';
             var nearStreetViewLocation = data.location.latLng;
             var heading = google.maps.geometry.spherical.computeHeading(
@@ -341,22 +333,23 @@ function initMap() {
 
           } else {
             infowindow.setContent('<div>' + marker.title + '</div>' +
-              '<div>No Street View Found</div>');
+              '<div>No Street View Found</div>' +
+              '<ul style="padding: 0; margin: 0"><li style="padding: 0">' +
+              'Temp: ' + temp_f + '° F <img style="width: 25px" src=' +
+              icon_url + '>' + icon + '<img style="" src=image/wundergroundLogo_4c.jpg>' +
+              '</li></ul>');
           }
         }
-
+        // getting data from weather underground API
         $.getJSON(url, function(data) {
           temp_f = data['current_observation']['temp_f'];
           icon_url = data['current_observation']['icon_url'];
           icon = data['current_observation']['icon'];
-          console.log("Getting weather from API", {
-            temp: temp_f,
-            icon_url: icon_url,
-            icon: icon
-          });
           //function to place google street view images within info windows
           streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
-        });   
+        }).fail(function(e){
+          alert("Data from Weather Undergorund API cannot be load")
+        })  
       }
     }
 
@@ -427,13 +420,17 @@ function initMap() {
 
     $(".hamburger-container").click(navState);
 
-    var infowindow = new google.maps.InfoWindow();
+    
     for (var i = 0; i < locations.length; i++) {
       var searchNav = $('#store' + i);
       searchNav.click(
       (function(marker) {
         return function() {
           populateInfoWindow(marker, infowindow);
+          if (infowindow) {
+            console.log("!!!!!")
+            infowindow.close();
+          }
           infowindow.open(map,marker);
           map.setZoom(16);
           map.setCenter(marker.getPosition());
